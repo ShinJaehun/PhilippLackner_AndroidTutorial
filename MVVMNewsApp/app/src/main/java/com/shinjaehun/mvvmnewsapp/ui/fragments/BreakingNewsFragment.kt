@@ -37,6 +37,12 @@ class BreakingNewsFragment: Fragment(R.layout.fragment_breaking_news) {
                     hideProgressBar()
                     response.data?.let { newsResponse ->
                         newsAdapter.differ.submitList(newsResponse.articles)
+//                        newsAdapter = NewsAdapter(newsResponse.articles)
+//
+//                        binding.rvBreakingNews.apply {
+//                            adapter = newsAdapter
+//                            layoutManager = LinearLayoutManager(activity)
+//                        }
                     }
                 }
                 is Resource.Error -> {
@@ -67,7 +73,6 @@ class BreakingNewsFragment: Fragment(R.layout.fragment_breaking_news) {
             layoutManager = LinearLayoutManager(activity)
         }
     }
-
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
