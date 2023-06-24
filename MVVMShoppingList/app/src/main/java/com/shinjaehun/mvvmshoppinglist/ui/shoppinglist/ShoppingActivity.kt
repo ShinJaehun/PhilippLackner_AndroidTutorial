@@ -5,21 +5,25 @@ import android.os.Bundle
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import com.google.android.material.floatingactionbutton.FloatingActionButton
-import com.shinjaehun.mvvmshoppinglist.R
-import com.shinjaehun.mvvmshoppinglist.data.db.ShoppingDatabase
 import com.shinjaehun.mvvmshoppinglist.data.db.entities.ShoppingItem
-import com.shinjaehun.mvvmshoppinglist.data.repositories.ShoppingRepository
 import com.shinjaehun.mvvmshoppinglist.databinding.ActivityShoppingBinding
 import com.shinjaehun.mvvmshoppinglist.other.ShoppingItemAdapter
-import org.kodein.di.KodeinAware
-import org.kodein.di.android.kodein
-import org.kodein.di.generic.instance
+import dagger.hilt.android.AndroidEntryPoint
 
-class ShoppingActivity : AppCompatActivity(), KodeinAware {
-    override val kodein by kodein()
-    private val factory : ShoppingViewModelFactory by instance()
+@AndroidEntryPoint
+class ShoppingActivity : AppCompatActivity() {
+    // kodein() 필요 없음!!!
+//    override val kodein by kodein()
+//    private val factory : ShoppingViewModelFactory
+
+    // 근데 이렇게 살펴보면... 굳이 ShoppingViewModelFactory() 생성할 필요가 없었는데...
+    // viewmodelfactory는 뭐 어디에 사용되는거여?
+//    private val viewModel: ShoppingViewModel by viewModels()
+
+    // 이것도 일단 adapter에 뭐 다른 기능을 넣을게 아니니까 굳이 context를 넘길 필요가 없을듯
+//    private val adapter by lazy {
+//        ShoppingItemAdapter(this@ShoppingActivity)
+//    }
 
     private lateinit var binding: ActivityShoppingBinding
 
@@ -34,7 +38,7 @@ class ShoppingActivity : AppCompatActivity(), KodeinAware {
 //        val database = ShoppingDatabase(this)
 //        val repository = ShoppingRepository(database)
 //        val factory = ShoppingViewModelFactory(repository)
-        val viewModel = ViewModelProvider(this, factory).get(ShoppingViewModel::class.java)
+        val viewModel = ViewModelProvider(this).get(ShoppingViewModel::class.java)
         val adapter = ShoppingItemAdapter(listOf(), viewModel)
 
 //        val rvShoppingItems = findViewById<RecyclerView>(R.id.rvShoppingItems)
@@ -50,7 +54,7 @@ class ShoppingActivity : AppCompatActivity(), KodeinAware {
         binding.fab.setOnClickListener {
             AddShoppingItemDialog(this, object: AddDialogListener{
                 override fun onAddButtonClicked(item: ShoppingItem) {
-                    viewModel.upsert(item)
+                    viewModel.upsertItem(item)
                 }
             }).show()
         }

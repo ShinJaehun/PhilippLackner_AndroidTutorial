@@ -39,21 +39,21 @@ class ShoppingItemAdapter(
         val ivDelete = holder.itemView.findViewById<ImageView>(R.id.ivDelete)
         ivDelete.setOnClickListener {
            Log.i(TAG, "current shopping item is ${currentShoppingItem.name}")
-           viewModel.delete(currentShoppingItem)
+           viewModel.deleteItem(currentShoppingItem)
         }
 
         val ivPlus = holder.itemView.findViewById<ImageView>(R.id.ivPlus)
         ivPlus.setOnClickListener {
             Log.i(TAG, "current shopping item is ${currentShoppingItem.name}")
             currentShoppingItem.amount++
-            viewModel.upsert(currentShoppingItem)
+            viewModel.upsertItem(currentShoppingItem)
         }
 
         val ivMinus = holder.itemView.findViewById<ImageView>(R.id.ivMinus)
         ivMinus.setOnClickListener {
             Log.i(TAG, "current shopping item is ${currentShoppingItem.name}")
-            currentShoppingItem.amount++
-            viewModel.upsert(currentShoppingItem)
+            currentShoppingItem.amount--
+            viewModel.upsertItem(currentShoppingItem)
         }
 
 //        holder.itemView.apply {
