@@ -11,6 +11,7 @@ import io.ktor.client.plugins.logging.Logging
 import io.ktor.client.statement.HttpResponse
 import kotlinx.serialization.serializer
 import io.ktor.serialization.kotlinx.json.*
+import kotlinx.serialization.json.Json
 
 interface PostsService {
 
@@ -19,18 +20,22 @@ interface PostsService {
 
     suspend fun createPost(postRequest: PostRequest): PostResponse?
 
-    companion object {
-        fun create(): PostsService {
-            return PostsServiceImpl(
-                client = HttpClient(Android) {
-                    install(Logging) {
-                        level = LogLevel.ALL
-                    }
-                    install(ContentNegotiation) {
-                        json()
-                    }
-                }
-            )
-        }
-    }
+//    companion object {
+//        fun create(): PostsService {
+//            return PostsServiceImpl(
+//                client = HttpClient(Android) {
+//                    install(Logging) {
+//                        level = LogLevel.ALL
+//                    }
+//                    install(ContentNegotiation) {
+//                        json(Json{
+//                            prettyPrint = true
+//                            isLenient = true
+//                            ignoreUnknownKeys = true
+//                        })
+//                    }
+//                }
+//            )
+//        }
+//    }
 }

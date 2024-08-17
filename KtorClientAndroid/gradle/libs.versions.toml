@@ -14,6 +14,19 @@ ktor-version= "2.3.12"
 #kotlinx-serialization-json = "1.7.1"
 #slf4j-android="1.7.36"
 
+lifecycleViewModelCompose = "2.8.4"
+
+coroutines-core="1.8.1"
+coroutines-android="1.8.1"
+
+ksp="1.9.0-1.0.12"
+
+hilt-android="2.48"
+hilt-android-compiler="2.48"
+hilt-compiler="2.48"
+hilt-navigation-compose="1.2.0"
+dagger-hilt-android="2.48"
+
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
@@ -42,7 +55,19 @@ ktor-client-content-negotiation={module="io.ktor:ktor-client-content-negotiation
 #slf4j-android={module="org.slf4j:slf4j-android", version.ref="slf4j-android"}
 #slf4j-simple={module="org.slf4j:slf4j-simple", version.ref="slf4j-android"}
 
+androidx-lifecycle-viewmodel-compose = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-compose", version.ref = "lifecycleViewModelCompose" }
+
+coroutines-core={module="org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref="coroutines-core"}
+coroutines-android={module="org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref="coroutines-android"}
+
+hilt-android={module="com.google.dagger:hilt-android", version.ref="hilt-android"}
+hilt-android-compiler={module="com.google.dagger:hilt-android-compiler", version.ref="hilt-android-compiler"}
+hilt-compiler={module="com.google.dagger:hilt-compiler", version.ref="hilt-compiler"}
+hilt-navigation-compose={module="androidx.hilt:hilt-navigation-compose", version.ref="hilt-navigation-compose"}
+
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 jetbrains-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-plugin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
+google-devtools-ksp = { id = "com.google.devtools.ksp", version.ref = "ksp"}
+dagger-hilt-android = {id="com.google.dagger.hilt.android", version.ref = "dagger-hilt-android"}
