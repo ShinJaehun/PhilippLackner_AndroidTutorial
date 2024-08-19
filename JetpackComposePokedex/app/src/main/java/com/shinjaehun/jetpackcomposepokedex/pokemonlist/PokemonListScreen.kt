@@ -59,7 +59,8 @@ import com.shinjaehun.jetpackcomposepokedex.ui.theme.RobotoCondensed
 
 @Composable
 fun PokemonListScreen(
-    navController: NavController
+    navController: NavController,
+    viewModel: PokemonListViewModel = hiltViewModel()
 ) {
     Surface(
         color = MaterialTheme.colorScheme.background,
@@ -80,7 +81,9 @@ fun PokemonListScreen(
                     .fillMaxWidth()
                     .padding(16.dp)
             ) {
-
+                // 진짜 멍청한 건지... kotlin에서 the last argument of lambda
+                // onSearch라고...
+                viewModel.searchPokemonList(it)
             }
             Spacer(modifier = Modifier.height(16.dp))
             PokemonList(navController = navController)
@@ -94,13 +97,8 @@ fun SearchBar(
     hint: String = "",
     onSearch: (String) -> Unit = {}
 ) {
-    var text by remember {
-        mutableStateOf("")
-    }
-
-    var isHintDisplayed by remember {
-        mutableStateOf(hint != "")
-    }
+    var text by remember { mutableStateOf("") }
+    var isHintDisplayed by remember { mutableStateOf(hint != "") }
 
     Box(modifier=modifier) {
         BasicTextField(
@@ -118,8 +116,7 @@ fun SearchBar(
                 .background(Color.White, CircleShape)
                 .padding(horizontal = 20.dp, vertical = 12.dp)
                 .onFocusChanged {
-//                    isHintDisplayed = it != FocusState.Active // 아마 이거 deprecated 된 거 같음...
-                    isHintDisplayed = !it.isFocused
+                    isHintDisplayed = !it.isFocused && text.isNotEmpty()
                 }
         )
         if(isHintDisplayed){
@@ -142,6 +139,7 @@ fun PokemonList(
     val endReached by remember { viewModel.endReached }
     val loadError by remember { viewModel.loadError }
     val isLoading by remember { viewModel.isLoading }
+    val isSearching by remember { viewModel.isSearching }
 
     LazyColumn(contentPadding = PaddingValues(16.dp)) {
         val itemCount = if (pokemonList.size % 2 == 0) {
@@ -150,8 +148,10 @@ fun PokemonList(
             pokemonList.size / 2 + 1
         }
         items(itemCount) {
-            if(it >= itemCount - 1 && !endReached)  {
-                viewModel.loadPokemonPaginated()
+            if(it >= itemCount - 1 && !endReached && !isLoading && !isSearching)  {
+                LaunchedEffect(key1 = true) { // 왜 이렇게 처리하는 지 잘 모르겠음!
+                    viewModel.loadPokemonPaginated()
+                }
             }
             PokedexRow(rowIndex = it, entries = pokemonList, navController = navController)
         }
@@ -205,21 +205,6 @@ fun PokedexEntry(
             }
     ) {
         Column {
-//            CoilImage( // 얘 deprecated...
-//                request = ImageRequest.Builder(LocalContext.current)
-//                    .data(entry.imageUrl)
-//                    .target {
-//                        viewModel.calcDominantColor(it) { color ->
-//                            dominantColor = color
-//                        }
-//                    }
-//                    .build(),
-//                contentDescription = entry.pokemonName,
-//                fadeIn = true,
-//                modifier = Modifier
-//                    .size(120.dp)
-//                    .align(CenterHorizontally)
-//            ) {}
             SubcomposeAsyncImage(
                 model = ImageRequest.Builder(LocalContext.current)
                     .data(entry.imageUrl)
@@ -241,27 +226,6 @@ fun PokedexEntry(
                     .size(120.dp)
                     .align(CenterHorizontally)
             )
-//            SubcomposeAsyncImage( // 얘는 내가 작성한거...
-//                model = ImageRequest.Builder(LocalContext.current)
-//                    .data(entry.imageUrl)
-//                    .target {
-//                        viewModel.calcDominantColor(it) { color ->
-//                            dominantColor = color
-//                        }
-//                    }
-//                    .crossfade(true)
-//                    .build(),
-//                contentDescription = entry.pokemonName,
-//                modifier = Modifier
-//                    .size(120.dp)
-//                    .align(CenterHorizontally),
-//                loading = {
-//                    CircularProgressIndicator(
-//                        color = MaterialTheme.colorScheme.primary,
-//                        modifier = Modifier.scale(0.5f)
-//                    )
-//                }
-//            )
             Text(
                 text = entry.pokemonName,
                 fontFamily = RobotoCondensed,
