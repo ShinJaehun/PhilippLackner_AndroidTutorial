@@ -26,8 +26,14 @@ hiltLifecycleViewModel="1.0.0-alpha03"
 ktor-version= "2.3.12"
 ktorClientWebsocket= "1.1.4"
 
+kotlinxSerializationJson = "1.4.1"
+kotlinxSerializationCore = "1.4.1"
+#Your current Kotlin version is 1.9.0, while kotlinx.serialization core runtime 1.7.1 requires at least Kotlin 2.0.0-RC1. Please update your Kotlin compiler and IDE plugin.
+
+
 ksp="1.9.0-1.0.12"
 dagger-hilt-android="2.48"
+kotlinPluginSerialization="1.9.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -69,9 +75,13 @@ ktor-client-logging = {module="io.ktor:ktor-client-logging", version.ref="ktor-v
 ktor-serialization-kotlinx-json = {module="io.ktor:ktor-serialization-kotlinx-json", version.ref="ktor-version"}
 ktor-client-content-negotiation={module="io.ktor:ktor-client-content-negotiation", version.ref="ktor-version"}
 
+kotlinx-serialization-json={module="org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref="kotlinxSerializationJson"}
+kotlinx-serialization-core={module="org.jetbrains.kotlinx:kotlinx-serialization-core", version.ref="kotlinxSerializationCore"}
+
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 jetbrains-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 
 google-devtools-ksp = { id = "com.google.devtools.ksp", version.ref = "ksp"}
 dagger-hilt-android = {id="com.google.dagger.hilt.android", version.ref = "dagger-hilt-android"}
+kotlin-plugin-serialization={id="org.jetbrains.kotlin.plugin.serialization", version.ref="kotlinPluginSerialization"}

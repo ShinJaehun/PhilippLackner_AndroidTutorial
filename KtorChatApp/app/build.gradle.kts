@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.jetbrains.kotlin.android)
     alias(libs.plugins.google.devtools.ksp)
     alias(libs.plugins.dagger.hilt.android)
+    alias(libs.plugins.kotlin.plugin.serialization)
 }
 
 android {
@@ -98,4 +99,5 @@ dependencies {
     implementation(libs.ktor.client.content.negotiation)
     // 이 패키지를 써야 ContentNegotiation에서 json() 사용 가능!
     implementation(libs.ktor.serialization.kotlinx.json)
+    implementation(libs.kotlinx.serialization.json)
 }
