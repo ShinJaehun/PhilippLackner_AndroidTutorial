@@ -16,10 +16,11 @@ import kotlinx.serialization.json.Json
 interface PostsService {
 
     suspend fun getPosts(): List<PostResponse>
-//    suspend fun getPosts(): HttpResponse
+//    suspend fun getPosts(): HttpResponse 이걸 viewmodel에서 받아서 처리하는 건 나쁜거지?
 
     suspend fun createPost(postRequest: PostRequest): PostResponse?
 
+    // di 적용하면 얘는 여기 있으면 안됩니다
 //    companion object {
 //        fun create(): PostsService {
 //            return PostsServiceImpl(

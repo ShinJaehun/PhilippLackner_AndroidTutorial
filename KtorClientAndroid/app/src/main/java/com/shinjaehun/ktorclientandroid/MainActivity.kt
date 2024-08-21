@@ -32,9 +32,17 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.NavType
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.shinjaehun.ktorclientandroid.data.remote.PostsService
 import com.shinjaehun.ktorclientandroid.data.remote.dto.PostRequest
 import com.shinjaehun.ktorclientandroid.data.remote.dto.PostResponse
+import com.shinjaehun.ktorclientandroid.presentation.auth.AuthScreen
+import com.shinjaehun.ktorclientandroid.presentation.posts.PostsScreen
+import com.shinjaehun.ktorclientandroid.presentation.posts.PostsState
 import com.shinjaehun.ktorclientandroid.ui.theme.KtorClientAndroidTheme
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
@@ -43,63 +51,28 @@ private const val TAG = "MainActivity"
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+    // This New Devise API Gem Makes User Auth So Simple! | Ruby On Rails 7 Tutorial
+    // https://youtu.be/sLcLwVCBU0c?feature=shared
 
-//    private val service = PostsService.create()
+    // android_crud_api_test_devise_api 프로젝트 참고
+    // https://github.com/Deanout/devise_api/blob/main/frontend/main.js
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            val viewModel: MainViewModel = hiltViewModel()
-            val posts = viewModel.state.value.postResponse
-            val isLoading = viewModel.state.value.isLoading
-//            viewModel.getPosts() // 이렇게 하면 큰일나요!! 계속 getPosts() 실행함...
-
-            Log.i(TAG, "posts: $posts")
-
-            KtorClientAndroidTheme {
-                Scaffold(
-                    modifier = Modifier.fillMaxSize(),
-                    floatingActionButton = {
-                        FloatingActionButton(
-                            contentColor = Color.White,
-                            containerColor = Color.Cyan,
-                            shape = CircleShape,
-                            onClick = {
-                                Log.i(TAG, "FAB")
-                                // todo
-//                                lifecycleScope.launch {
-//                                    val response = service.createPost(PostRequest(body = "안녕하세요", title = "인사", user_id = 1))
-//                                    Log.i(TAG, "response: ${response}")
-//                                }
-                            }
-                        ) {
-                            Icon(Icons.Filled.Add, "post")
-                        }
+            setContent {
+                val navController = rememberNavController()
+                NavHost(navController = navController, startDestination = "auth_screen") {
+                    composable("auth_screen") {
+                        AuthScreen(onNavigate = navController::navigate)
                     }
-                ) { innerPadding ->
-                    LazyColumn(modifier = Modifier.padding(innerPadding)) {
-
-                        if (posts != null) {
-                            items(posts) {
-                                Column(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(16.dp)
-                                ) {
-                                    Text(text = it.title, fontSize = 20.sp)
-                                    Spacer(modifier = Modifier.height(4.dp))
-                                    Text(text = it.body, fontSize = 14.sp)
-                                }
-                            }
-                        }
-                    }
-                    Spacer(modifier = Modifier.height(8.dp))
-                    if(isLoading){
-                        CircularProgressIndicator()
+                    composable("posts_screen") {
+                        PostsScreen()
                     }
                 }
             }
+
         }
     }
 }

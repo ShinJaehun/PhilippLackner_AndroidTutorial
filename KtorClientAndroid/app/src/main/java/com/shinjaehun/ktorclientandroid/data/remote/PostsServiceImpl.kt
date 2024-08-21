@@ -24,7 +24,7 @@ class PostsServiceImpl(
             val httpResponse = client.get {
                 url(HttpRoutes.POSTS)
             }
-            return httpResponse.body()
+            httpResponse.body()
         } catch(e: RedirectResponseException) {
             // 3xx -response
             println("Error: ${e.response.status.description}")
@@ -50,7 +50,7 @@ class PostsServiceImpl(
                 contentType(ContentType.Application.Json)
                 setBody(postRequest)
             }
-            return httpResponse.body()
+            httpResponse.body()
         } catch(e: RedirectResponseException) {
             // 3xx -response
             println("Error: ${e.response.status.description}")
