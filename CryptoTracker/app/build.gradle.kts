@@ -25,7 +25,7 @@ android {
 
     buildTypes {
         debug {
-            buildConfigField("String", "BASE_URL", "\"https://api.conincap.io/v2/\"")
+            buildConfigField("String", "BASE_URL", "\"https://api.coincap.io/v2/\"")
         }
 
         release {
@@ -35,7 +35,7 @@ android {
                 "proguard-rules.pro"
             )
 
-            buildConfigField("String", "BASE_URL", "\"https://api.conincap.io/v2/\"")
+            buildConfigField("String", "BASE_URL", "\"https://api.coincap.io/v2/\"")
         }
     }
     compileOptions {
