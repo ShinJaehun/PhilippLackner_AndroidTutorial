@@ -1,6 +1,5 @@
 package com.shinjaehun.cryptotracker.core.domain.util
 
-
 typealias DomainError = Error
 
 sealed interface Result<out D, out E: Error> {
