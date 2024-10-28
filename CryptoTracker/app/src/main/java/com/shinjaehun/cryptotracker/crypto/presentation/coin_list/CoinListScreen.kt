@@ -35,6 +35,7 @@ import kotlinx.coroutines.withContext
 fun CoinListScreen(
     state: CoinListState,
 //    events: Flow<CoinListEvent>, // generic으로 넘김!
+    onAction: (CoinListAction) -> Unit,
     modifier: Modifier = Modifier
 ) {
 
@@ -73,7 +74,7 @@ fun CoinListScreen(
            items(state.coins) { coinUi ->
                CoinListItem(
                    coinUi = coinUi,
-                   onClick = {},
+                   onClick = { onAction(CoinListAction.OnCoinClick(coinUi)) },
                    modifier = Modifier.fillParentMaxWidth()
                )
                HorizontalDivider()
@@ -94,7 +95,8 @@ private fun CoinListScreenPreview() {
             ),
 //            events = emptyFlow(),
             modifier = Modifier
-                .background(MaterialTheme.colorScheme.background)
+                .background(MaterialTheme.colorScheme.background),
+            onAction = {}
         )
     }
 }
