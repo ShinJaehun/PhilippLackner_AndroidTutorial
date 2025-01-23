@@ -45,6 +45,7 @@ import bookpedia.composeapp.generated.resources.remove_from_favorites
 import coil3.compose.rememberAsyncImagePainter
 import com.shinjaehun.bookpedia.core.presentation.DarkBlue
 import com.shinjaehun.bookpedia.core.presentation.DesertWhite
+import com.shinjaehun.bookpedia.core.presentation.PulseAnimation
 import com.shinjaehun.bookpedia.core.presentation.SandYellow
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
@@ -142,10 +143,10 @@ fun BlurredImageBackground(
                             modifier = Modifier.fillMaxSize(),
                             contentAlignment = Alignment.Center
                         ) {
-//                            PulseAnimation(
-//                                modifier = Modifier
-//                                    .size(60.dp)
-//                            )
+                            PulseAnimation(
+                                modifier = Modifier
+                                    .size(60.dp)
+                            )
                         }
                         else -> {
                             Box {

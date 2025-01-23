@@ -77,6 +77,10 @@ kotlin {
         nativeMain.dependencies {
             implementation(libs.ktor.client.darwin)
         }
+
+        dependencies {
+            ksp(libs.androidx.room.compiler)
+        }
     }
 }
 

@@ -1,3 +1,5 @@
+@file:OptIn(FlowPreview::class)
+
 package com.shinjaehun.bookpedia.book.presentation.book_list
 
 import androidx.lifecycle.ViewModel
@@ -35,7 +37,7 @@ class BookListViewModel(
             if(cachedBooks.isEmpty()) {
                 observeSearchQuery()
             }
-//            observeFavoriteBooks()
+            observeFavoriteBooks()
         }
         .stateIn(
             viewModelScope,
@@ -62,7 +64,18 @@ class BookListViewModel(
         }
     }
 
-    @OptIn(FlowPreview::class)
+    private fun observeFavoriteBooks() {
+        observeFavoriteJob?.cancel()
+        observeFavoriteJob = bookRepository
+            .getFavoriteBooks()
+            .onEach { favoriteBooks ->
+                _state.update { it.copy(
+                    favoriteBooks = favoriteBooks
+                ) }
+            }
+            .launchIn(viewModelScope)
+    }
+
     private fun observeSearchQuery() {
         state
             .map { it.searchQuery }
