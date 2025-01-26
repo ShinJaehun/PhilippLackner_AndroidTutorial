@@ -3,7 +3,6 @@ package com.shinjaehun.weatherapp.domain.weather
 import androidx.annotation.DrawableRes
 import com.shinjaehun.weatherapp.R
 
-
 sealed class WeatherType(
     val weatherDesc: String,
     @DrawableRes val iconRes: Int
