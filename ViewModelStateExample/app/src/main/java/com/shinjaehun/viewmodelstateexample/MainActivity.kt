@@ -27,7 +27,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             ViewModelStateExampleTheme {
                 val viewModel = viewModel<MainViewModel>()
-                val composeColor = viewModel.composeColor
+//                val composeColor = viewModel.composeColor
 //                val flowColor by viewModel.color.collectAsStateWithLifecycle()
                 val flowColor by viewModel.color.collectAsState()
 
