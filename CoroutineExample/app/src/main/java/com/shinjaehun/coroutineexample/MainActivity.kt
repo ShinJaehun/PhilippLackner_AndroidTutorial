@@ -63,7 +63,7 @@ class MainActivity : AppCompatActivity() {
 
 //        Coroutine Contexts - Kotlin Coroutines
 
-//        val tvHello = findViewById<TextView>(R.id.tvHello)
+//        val tvHello = findViewById<TextView>(R.id.tvData)
 //
 //        GlobalScope.launch(Dispatchers.IO) {
 //            // network call이기 때문에...
@@ -77,7 +77,17 @@ class MainActivity : AppCompatActivity() {
 //            }
 //        }
 
-//        runBlocking - Kotlin Coroutines
+//        GlobalScope.launch(Dispatchers.Main) {
+//            Log.d(TAG, "Starting coroutine in thread ${Thread.currentThread().name}")
+//
+//            val answer = doNetworkCall()
+//            withContext(Dispatchers.Main) {
+//                Log.d(TAG, "Setting text in thread ${Thread.currentThread().name}")
+//                tvHello.text = answer
+//            }
+//        }
+
+    //        runBlocking - Kotlin Coroutines
 
         // 결국 얘랑
 //        Log.d(TAG, "Before runBlocking")
@@ -101,26 +111,35 @@ class MainActivity : AppCompatActivity() {
 //
 //        Log.d(TAG, "After runBlocking")
 
-//        Log.d(TAG, "Before runBlocking")
-//
+
 //        runBlocking {
-//            launch(Dispatchers.IO) {
+//            val time = measureTimeMillis {
+//                // 이 작업은 Main Thread에서 일어나며 6초 후에 작업이 끝남...
 //                delay(3000L)
-//                Log.d(TAG, "Finished IO Coroutine1")
-//            }
-//            launch(Dispatchers.IO) {
+//                Log.d(TAG, "Finished IO Coroutine1 in ${Thread.currentThread().name}")
 //                delay(3000L)
-//                Log.d(TAG, "Finished IO Coroutine2")
-//            }
-//            // 얘네 둘은 6초 후에 같이 끝나지 않음(둘 다 다른 thread이기 때문!)
-//            // 3초 후에 거의 비슷하게 먼저 끝남
-//            // 그리고 이후의 과정을 재개
-//            Log.d(TAG, "Start of runBlocking")
-//            delay(5000L)
-//            Log.d(TAG, "End of runBlocking")
-//        }
+//                Log.d(TAG, "Finished IO Coroutine2 in ${Thread.currentThread().name}")
 //
-//        Log.d(TAG, "After runBlocking")
+//            }
+//            Log.d(TAG, "Completed in $time ms")
+//        }
+
+//        runBlocking {
+//            val time = measureTimeMillis {
+
+//                launch(Dispatchers.IO) {
+//                    delay(3000L)
+//                    Log.d(TAG, "Finished IO Coroutine1")
+//                }
+//                launch(Dispatchers.IO) {
+//                    delay(3000L)
+//                    Log.d(TAG, "Finished IO Coroutine2")
+//                }
+                // 얘네 둘은 6초 후에 같이 끝나지 않음
+                // 하위 coroutine에서 비동기로 실행되기 때문에 더 빨리 끝남.
+//            }
+//            Log.d(TAG, "Completed in $time ms")
+//        }
 
 //        Jobs, Waiting, Cancelation - Kotlin Coroutines
 
@@ -274,11 +293,11 @@ class MainActivity : AppCompatActivity() {
 
 //        Coroutines with Retrofit - Kotlin Coroutines
 
-        val api = Retrofit.Builder()
-            .baseUrl(BASE_URL)
-            .addConverterFactory(GsonConverterFactory.create())
-            .build()
-            .create(MyAPI::class.java)
+//        val api = Retrofit.Builder()
+//            .baseUrl(BASE_URL)
+//            .addConverterFactory(GsonConverterFactory.create())
+//            .build()
+//            .create(MyAPI::class.java)
 
 //        api.getComments().enqueue(object: Callback<List<Comment>> {
 //            // enqueue() 이게 효율적이지 않다고 함...
@@ -315,17 +334,23 @@ class MainActivity : AppCompatActivity() {
 //            }
 //        }
 
-        GlobalScope.launch(Dispatchers.IO) {
-            // api가 response object를 직접 받아온다면...
-            val response = api.getComments()
-            if (response.isSuccessful) {
-                for(comment in response.body()!!) {
-                    Log.d(TAG, comment.toString())
-                }
-            }
-        }
+//        GlobalScope.launch(Dispatchers.IO) {
+//            // api가 response object를 직접 받아온다면...
+//            val response = api.getComments()
+//            if (response.isSuccessful) {
+//                for(comment in response.body()!!) {
+//                    Log.d(TAG, comment.toString())
+//                }
+//            }
+//        }
+
 
     }
+
+//        suspend fun doNetworkCall(): String {
+//            delay(3000L)
+//            return "Answer"
+//        }
 
 //    suspend fun networkCall1(): String {
 //        delay(3000L)
