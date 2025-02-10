@@ -1,15 +1,18 @@
 package com.shinjaehun.storageexample
 
+import android.content.ContentValues
+import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.os.Build
 import android.os.Bundle
+import android.provider.MediaStore
 import android.widget.Toast
-import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.result.launch
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
@@ -25,6 +28,11 @@ class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
 
     private lateinit var internalStoragePhotoAdapter: InternalStoragePhotoAdapter
+    private lateinit var externalStoragePhotoAdapter: SharedPhotoAdapter
+
+    private var readPermissionGranted = false
+    private var writePermissionGranted = false
+    private lateinit var permissionsLauncher: ActivityResultLauncher<Array<String>>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -41,16 +49,31 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
+        externalStoragePhotoAdapter = SharedPhotoAdapter {
+
+        }
+
+        permissionsLauncher = registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) {permissions ->
+            readPermissionGranted = permissions[android.Manifest.permission.READ_EXTERNAL_STORAGE] ?: readPermissionGranted
+            writePermissionGranted = permissions[android.Manifest.permission.WRITE_EXTERNAL_STORAGE] ?: writePermissionGranted
+        }
+
+        updateOrRequestPermissions()
+
         val takePhoto = registerForActivityResult(ActivityResultContracts.TakePicturePreview()) {
             val isPrivate = binding.switchPrivate.isChecked
+            val isSavedSuccessfully = when {
+                isPrivate -> savePhotoToInternalStorage(UUID.randomUUID().toString(), it!!)
+                writePermissionGranted -> savePhotoToExternalStorage(UUID.randomUUID().toString(), it!!)
+                else -> false
+            }
             if(isPrivate) {
-                val isSavedSuccessfully = savePhotoToInternalStorage(UUID.randomUUID().toString(), it!!)
-                if(isSavedSuccessfully) {
-                    loadPhotosFromInternalStorageIntoRecyclerView()
-                    Toast.makeText(this, "Photo saved successfully", Toast.LENGTH_SHORT).show()
-                } else {
-                    Toast.makeText(this, "Failed to save photo", Toast.LENGTH_SHORT).show()
-                }
+                loadPhotosFromInternalStorageIntoRecyclerView()
+            }
+            if(isSavedSuccessfully) {
+                Toast.makeText(this, "Photo saved successfully", Toast.LENGTH_SHORT).show()
+            } else {
+                Toast.makeText(this, "Failed to save photo", Toast.LENGTH_SHORT).show()
             }
         }
 
@@ -68,6 +91,60 @@ class MainActivity : AppCompatActivity() {
 //        rv.layoutManager = StaggeredGridLayoutManager(3, RecyclerView.VERTICAL)
 
         loadPhotosFromInternalStorageIntoRecyclerView()
+    }
+
+    private fun updateOrRequestPermissions() {
+        val hasReadPermission = ContextCompat.checkSelfPermission(
+            this,
+            android.Manifest.permission.READ_EXTERNAL_STORAGE
+        ) == PackageManager.PERMISSION_GRANTED
+        val hasWritePermission = ContextCompat.checkSelfPermission(
+            this,
+            android.Manifest.permission.WRITE_EXTERNAL_STORAGE
+        ) == PackageManager.PERMISSION_GRANTED
+        val minSdk29 = Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q
+        val minSdk33 = Build.VERSION.SDK_INT >= 33
+
+        readPermissionGranted = hasReadPermission || minSdk33
+        writePermissionGranted = hasWritePermission || minSdk29
+
+        val permissionsToRequest = mutableListOf<String>()
+        if(!writePermissionGranted) {
+            permissionsToRequest.add(android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
+        }
+        if(!readPermissionGranted) {
+            permissionsToRequest.add(android.Manifest.permission.READ_EXTERNAL_STORAGE)
+        }
+
+        if (permissionsToRequest.isNotEmpty()) {
+            permissionsLauncher.launch(permissionsToRequest.toTypedArray())
+        }
+    }
+
+    private fun savePhotoToExternalStorage(displayName: String, bmp: Bitmap): Boolean {
+        val imageCollection = sdk29AndUp {
+            MediaStore.Images.Media.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY)
+        } ?: MediaStore.Images.Media.EXTERNAL_CONTENT_URI
+
+        val contentValues = ContentValues().apply {
+            put(MediaStore.Images.Media.DISPLAY_NAME, "$displayName.jpg")
+            put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg")
+            put(MediaStore.Images.Media.WIDTH, bmp.width)
+            put(MediaStore.Images.Media.HEIGHT, bmp.height)
+        }
+        return try {
+            contentResolver.insert(imageCollection, contentValues)?.also { uri ->
+                contentResolver.openOutputStream(uri).use { outputStream ->
+                    if (!bmp.compress(Bitmap.CompressFormat.JPEG, 95, outputStream!!)) {
+                        throw IOException("Couldn't save bitmap")
+                    }
+                }
+            } ?: throw IOException("Couldn't create MediaStore entry")
+            true
+        } catch (e: IOException) {
+            e.printStackTrace()
+            false
+        }
     }
 
     private fun setupInternalStorageRecyclerView() = binding.rvPrivatePhotos.apply {
