@@ -1,17 +1,20 @@
 package com.shinjaehun.storageexample
 
+import android.app.RecoverableSecurityException
 import android.content.ContentUris
 import android.content.ContentValues
 import android.content.pm.PackageManager
 import android.database.ContentObserver
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.result.launch
 import androidx.appcompat.app.AppCompatActivity
@@ -39,8 +42,14 @@ class MainActivity : AppCompatActivity() {
     private var readPermissionGranted = false
     private var writePermissionGranted = false
     private lateinit var permissionsLauncher: ActivityResultLauncher<Array<String>>
+    private lateinit var intentSenderLauncher: ActivityResultLauncher<IntentSenderRequest>
 
     private lateinit var contentObserver: ContentObserver
+
+    private var deletedImageUri: Uri? = null
+    // api 28은 동의 없이 삭제
+    // api 30+ 동의 후 삭제
+    // api 29는 뭔가 이상하게 동작함(동의 후 삭제해도 지워지지 않은 상태로 남아 있음...), 이걸 처리하기 위한 장치
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -60,29 +69,33 @@ class MainActivity : AppCompatActivity() {
         }
 
         externalStoragePhotoAdapter = SharedPhotoAdapter {
-
+            lifecycleScope.launch {
+                deletePhotoFromExternalStorage(it.contentUri)
+                deletedImageUri = it.contentUri
+            }
         }
 
         setupExternalStorageRecyclerView()
         initContentObserver()
 
-        /// 33 이상인 경우 READ_MEDIA_IMAGES를 허가하도록 해줘야 하는데...
-//        val permissions = if (Build.VERSION.SDK_INT >= 33) {
-//            arrayOf(
-//                android.Manifest.permission.READ_MEDIA_AUDIO,
-//                android.Manifest.permission.READ_MEDIA_VIDEO,
-//                android.Manifest.permission.READ_MEDIA_IMAGES
-//            )
-//        } else {
-//            arrayOf(
-//                android.Manifest.permission.READ_EXTERNAL_STORAGE
-//            )
-//        }
-//        ActivityCompat.requestPermissions(
-//            this,
-//            permissions,
-//            0
-//        )
+        // 33 이상인 경우 READ_MEDIA_IMAGES를 허가하도록 해줘야 하는데...
+        // 급한대로 이렇게 해서 적용해줄 수 있음...
+        val permissions = if (Build.VERSION.SDK_INT >= 33) {
+            arrayOf(
+                android.Manifest.permission.READ_MEDIA_AUDIO,
+                android.Manifest.permission.READ_MEDIA_VIDEO,
+                android.Manifest.permission.READ_MEDIA_IMAGES
+            )
+        } else {
+            arrayOf(
+                android.Manifest.permission.READ_EXTERNAL_STORAGE
+            )
+        }
+        ActivityCompat.requestPermissions(
+            this,
+            permissions,
+            0
+        )
 
         permissionsLauncher = registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
             readPermissionGranted = permissions[android.Manifest.permission.READ_EXTERNAL_STORAGE] ?: readPermissionGranted
@@ -99,6 +112,22 @@ class MainActivity : AppCompatActivity() {
         }
 
         updateOrRequestPermissions()
+
+        intentSenderLauncher = registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) {
+            if(it.resultCode == RESULT_OK) {
+                if (Build.VERSION.SDK_INT == Build.VERSION_CODES.Q) {
+                    // api 28은 동의 없이 삭제
+                    // api 30+ 동의 후 삭제
+                    // api 29는 뭔가 이상하게 동작함(동의 후 삭제해도 지워지지 않은 상태로 남아 있음...), 이걸 처리하기 위한 장치
+                    lifecycleScope.launch {
+                        deletePhotoFromExternalStorage(deletedImageUri ?: return@launch)
+                    }
+                }
+                Toast.makeText(this@MainActivity, "Photo deleted successfully", Toast.LENGTH_SHORT).show()
+            } else {
+                Toast.makeText(this@MainActivity, "Photo couldn't be deleted", Toast.LENGTH_SHORT).show()
+            }
+        }
 
         val takePhoto = registerForActivityResult(ActivityResultContracts.TakePicturePreview()) {
             lifecycleScope.launch {
@@ -150,6 +179,30 @@ class MainActivity : AppCompatActivity() {
             true,
             contentObserver
         )
+    }
+
+    private suspend fun deletePhotoFromExternalStorage(photoUri: Uri) {
+        withContext(Dispatchers.IO) {
+            try {
+                contentResolver.delete(photoUri, null, null)
+            } catch (e: SecurityException) {
+                val intentSender = when {
+                    Build.VERSION.SDK_INT >= Build.VERSION_CODES.R -> {
+                        MediaStore.createDeleteRequest(contentResolver, listOf(photoUri)).intentSender
+                    }
+                    Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q -> {
+                        val recoverableSecurityException = e as? RecoverableSecurityException
+                        recoverableSecurityException?.userAction?.actionIntent?.intentSender
+                    }
+                    else -> null
+                }
+                intentSender?.let { sender ->
+                    intentSenderLauncher.launch(
+                        IntentSenderRequest.Builder(sender).build()
+                    )
+                }
+            }
+        }
     }
 
     private suspend fun loadPhotosFromExternalStorage(): List<SharedStoragePhoto> {
