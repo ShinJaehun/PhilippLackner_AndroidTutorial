@@ -80,25 +80,33 @@ class MainActivity : AppCompatActivity() {
 
         // 33 이상인 경우 READ_MEDIA_IMAGES를 허가하도록 해줘야 하는데...
         // 급한대로 이렇게 해서 적용해줄 수 있음...
-        val permissions = if (Build.VERSION.SDK_INT >= 33) {
-            arrayOf(
-                android.Manifest.permission.READ_MEDIA_AUDIO,
-                android.Manifest.permission.READ_MEDIA_VIDEO,
-                android.Manifest.permission.READ_MEDIA_IMAGES
-            )
-        } else {
-            arrayOf(
-                android.Manifest.permission.READ_EXTERNAL_STORAGE
-            )
-        }
-        ActivityCompat.requestPermissions(
-            this,
-            permissions,
-            0
-        )
+//        val permissions = if (Build.VERSION.SDK_INT >= 33) {
+//            arrayOf(
+//                android.Manifest.permission.READ_MEDIA_AUDIO,
+//                android.Manifest.permission.READ_MEDIA_VIDEO,
+//                android.Manifest.permission.READ_MEDIA_IMAGES
+//            )
+//        } else {
+//            arrayOf(
+//                android.Manifest.permission.READ_EXTERNAL_STORAGE
+//            )
+//        }
+//        ActivityCompat.requestPermissions(
+//            this,
+//            permissions,
+//            0
+//        )
 
         permissionsLauncher = registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
-            readPermissionGranted = permissions[android.Manifest.permission.READ_EXTERNAL_STORAGE] ?: readPermissionGranted
+//            readPermissionGranted =
+//                permissions[android.Manifest.permission.READ_EXTERNAL_STORAGE] ?: readPermissionGranted
+            readPermissionGranted =
+                if (Build.VERSION.SDK_INT >= 33) {
+                    permissions[android.Manifest.permission.READ_MEDIA_IMAGES] ?: readPermissionGranted
+                } else {
+                    permissions[android.Manifest.permission.READ_EXTERNAL_STORAGE] ?: readPermissionGranted
+                }
+
 //            sdk29AndUp { readPermissionGranted = permissions[android.Manifest.permission.READ_EXTERNAL_STORAGE] ?: readPermissionGranted }
 //            sdk33AndUp { readPermissionGranted = permissions[android.Manifest.permission.READ_MEDIA_IMAGES] ?: readPermissionGranted }
 
@@ -108,6 +116,7 @@ class MainActivity : AppCompatActivity() {
                 loadPhotosFromExternalStorageIntoRecyclerView()
             } else {
                 Toast.makeText(this, "Can't read files without permissions.", Toast.LENGTH_LONG).show()
+                //request permission을 여기서? 아, 그러고 보니 launcher를 리턴해야 쓸 수 있구나...
             }
         }
 
@@ -195,6 +204,18 @@ class MainActivity : AppCompatActivity() {
                         recoverableSecurityException?.userAction?.actionIntent?.intentSender
                     }
                     else -> null
+                    // Writing exception to parcel
+                    // android.app.RecoverableSecurityException: com.shinjaehun.storageexample has no access to
+                    // content://media/external/images/media/1000000050
+
+                    // https://stackoverflow.com/questions/60516401/android-q-recoverablesecurityexception-not-granting-access
+
+                    // I have come across a very similar issue in Android Q, when deleting an image using Content resolver
+                    // delete call. It turned out that despite me catching RecoverableSecurityException for permission
+                    // to delete the image from the android gallery - it still has thrown an error that it could not delete
+                    // the file because the app doesn't have permission (thus after opening Google Photos it would scan
+                    // for images and find the "undeleted" one making it come back). This is where I saw the same error
+                    // as in your question. When I tried the same code on Android R file did not come back.
                 }
                 intentSender?.let { sender ->
                     intentSenderLauncher.launch(
@@ -251,10 +272,23 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun updateOrRequestPermissions() {
-        val hasReadPermission = ContextCompat.checkSelfPermission(
-            this,
-            android.Manifest.permission.READ_EXTERNAL_STORAGE
-        ) == PackageManager.PERMISSION_GRANTED
+//        val hasReadPermission = ContextCompat.checkSelfPermission(
+//            this,
+//            android.Manifest.permission.READ_EXTERNAL_STORAGE
+//        ) == PackageManager.PERMISSION_GRANTED
+
+        val hasReadPermission = if (Build.VERSION.SDK_INT >= 33) {
+            ContextCompat.checkSelfPermission(
+                this,
+                android.Manifest.permission.READ_MEDIA_IMAGES
+            ) == PackageManager.PERMISSION_GRANTED
+        } else {
+            ContextCompat.checkSelfPermission(
+                this,
+                android.Manifest.permission.READ_EXTERNAL_STORAGE
+            ) == PackageManager.PERMISSION_GRANTED
+        }
+
 //        var hasReadPermission: Boolean = false
 //        sdk29AndUp { hasReadPermission = ContextCompat.checkSelfPermission(
 //            this,
@@ -273,7 +307,7 @@ class MainActivity : AppCompatActivity() {
         val minSdk29 = Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q
         val minSdk33 = Build.VERSION.SDK_INT >= 33
 
-        readPermissionGranted = hasReadPermission || minSdk33
+        readPermissionGranted = hasReadPermission
         writePermissionGranted = hasWritePermission || minSdk29
 
         val permissionsToRequest = mutableListOf<String>()
@@ -281,7 +315,14 @@ class MainActivity : AppCompatActivity() {
             permissionsToRequest.add(android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
         }
         if(!readPermissionGranted) {
-            permissionsToRequest.add(android.Manifest.permission.READ_EXTERNAL_STORAGE)
+//            permissionsToRequest.add(android.Manifest.permission.READ_EXTERNAL_STORAGE)
+
+            if (Build.VERSION.SDK_INT >= 33) {
+                permissionsToRequest.add(android.Manifest.permission.READ_MEDIA_IMAGES)
+            } else {
+                permissionsToRequest.add(android.Manifest.permission.READ_EXTERNAL_STORAGE)
+            }
+
 //            sdk29AndUp { permissionsToRequest.add(android.Manifest.permission.READ_EXTERNAL_STORAGE) }
 //            sdk33AndUp { permissionsToRequest.add(android.Manifest.permission.READ_MEDIA_IMAGES) }
         }
