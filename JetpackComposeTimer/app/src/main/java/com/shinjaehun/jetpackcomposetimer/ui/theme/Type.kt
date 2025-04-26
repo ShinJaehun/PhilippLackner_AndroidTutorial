@@ -1,4 +1,4 @@
-package com.shinjaehun.jetpacktimer.ui.theme
+package com.shinjaehun.jetpackcomposetimer.ui.theme
 
 import androidx.compose.material.Typography
 import androidx.compose.ui.text.TextStyle

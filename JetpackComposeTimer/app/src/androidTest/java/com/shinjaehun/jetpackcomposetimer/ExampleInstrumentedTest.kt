@@ -1,4 +1,4 @@
-package com.shinjaehun.jetpacktimer
+package com.shinjaehun.jetpackcomposetimer
 
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.ext.junit.runners.AndroidJUnit4

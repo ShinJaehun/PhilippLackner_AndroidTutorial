@@ -1,4 +1,4 @@
-package com.shinjaehun.jetpacktimer.ui.theme
+package com.shinjaehun.jetpackcomposetimer.ui.theme
 
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material.MaterialTheme

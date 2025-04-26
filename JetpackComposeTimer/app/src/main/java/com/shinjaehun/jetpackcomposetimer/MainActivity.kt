@@ -1,4 +1,4 @@
-package com.shinjaehun.jetpacktimer
+package com.shinjaehun.jetpackcomposetimer
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -14,18 +14,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.PaintingStyle.Companion.Stroke
 import androidx.compose.ui.graphics.PointMode
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.shinjaehun.jetpacktimer.ui.theme.JetpackTimerTheme
 import kotlinx.coroutines.delay
 import kotlin.math.PI
 import kotlin.math.cos

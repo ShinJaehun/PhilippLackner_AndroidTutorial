@@ -4,11 +4,11 @@ plugins {
 }
 
 android {
-    namespace 'com.shinjaehun.jetpacktimer'
+    namespace 'com.shinjaehun.jetpackcomposetimer'
     compileSdk 33
 
     defaultConfig {
-        applicationId "com.shinjaehun.jetpacktimer"
+        applicationId "com.shinjaehun.jetpackcomposetimer"
         minSdk 24
         targetSdk 33
         versionCode 1

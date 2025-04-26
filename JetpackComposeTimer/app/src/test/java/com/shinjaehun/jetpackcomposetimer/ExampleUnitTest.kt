@@ -1,4 +1,4 @@
-package com.shinjaehun.jetpacktimer
+package com.shinjaehun.jetpackcomposetimer
 
 import org.junit.Test
 
