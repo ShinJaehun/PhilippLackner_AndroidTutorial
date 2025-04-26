@@ -17,7 +17,7 @@ import com.shinjaehun.jetpackcomposemeditationui.ui.theme.JetpackComposeMeditati
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
+//        enableEdgeToEdge()
         setContent {
             JetpackComposeMeditationUITheme {
                 HomeScreen()

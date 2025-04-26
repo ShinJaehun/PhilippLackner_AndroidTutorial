@@ -300,7 +300,7 @@ fun FeatureSection(
     Column(modifier = Modifier.fillMaxWidth()) {
         Text(
             text = "Features",
-            style = MaterialTheme.typography.headlineMedium,
+            style = MaterialTheme.typography.headlineLarge,
             modifier = Modifier.padding(15.dp)
         )
         LazyVerticalGrid(

@@ -1,8 +1,10 @@
 package com.shinjaehun.storageexample
 
+import android.Manifest
 import android.app.RecoverableSecurityException
 import android.content.ContentUris
 import android.content.ContentValues
+import android.content.IntentSender
 import android.content.pm.PackageManager
 import android.database.ContentObserver
 import android.graphics.Bitmap
@@ -17,6 +19,7 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.result.launch
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -41,6 +44,7 @@ class MainActivity : AppCompatActivity() {
 
     private var readPermissionGranted = false
     private var writePermissionGranted = false
+
     private lateinit var permissionsLauncher: ActivityResultLauncher<Array<String>>
     private lateinit var intentSenderLauncher: ActivityResultLauncher<IntentSenderRequest>
 
@@ -98,19 +102,19 @@ class MainActivity : AppCompatActivity() {
 //        )
 
         permissionsLauncher = registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
-//            readPermissionGranted =
-//                permissions[android.Manifest.permission.READ_EXTERNAL_STORAGE] ?: readPermissionGranted
+
+            permissions.map {
+                Log.i(TAG, it.key)
+            }
+
             readPermissionGranted =
                 if (Build.VERSION.SDK_INT >= 33) {
-                    permissions[android.Manifest.permission.READ_MEDIA_IMAGES] ?: readPermissionGranted
+                    permissions[Manifest.permission.READ_MEDIA_IMAGES] ?: readPermissionGranted
                 } else {
-                    permissions[android.Manifest.permission.READ_EXTERNAL_STORAGE] ?: readPermissionGranted
+                    permissions[Manifest.permission.READ_EXTERNAL_STORAGE] ?: readPermissionGranted
                 }
 
-//            sdk29AndUp { readPermissionGranted = permissions[android.Manifest.permission.READ_EXTERNAL_STORAGE] ?: readPermissionGranted }
-//            sdk33AndUp { readPermissionGranted = permissions[android.Manifest.permission.READ_MEDIA_IMAGES] ?: readPermissionGranted }
-
-            writePermissionGranted = permissions[android.Manifest.permission.WRITE_EXTERNAL_STORAGE] ?: writePermissionGranted
+            writePermissionGranted = permissions[Manifest.permission.WRITE_EXTERNAL_STORAGE] ?: writePermissionGranted
 
             if(readPermissionGranted) {
                 loadPhotosFromExternalStorageIntoRecyclerView()
@@ -204,18 +208,6 @@ class MainActivity : AppCompatActivity() {
                         recoverableSecurityException?.userAction?.actionIntent?.intentSender
                     }
                     else -> null
-                    // Writing exception to parcel
-                    // android.app.RecoverableSecurityException: com.shinjaehun.storageexample has no access to
-                    // content://media/external/images/media/1000000050
-
-                    // https://stackoverflow.com/questions/60516401/android-q-recoverablesecurityexception-not-granting-access
-
-                    // I have come across a very similar issue in Android Q, when deleting an image using Content resolver
-                    // delete call. It turned out that despite me catching RecoverableSecurityException for permission
-                    // to delete the image from the android gallery - it still has thrown an error that it could not delete
-                    // the file because the app doesn't have permission (thus after opening Google Photos it would scan
-                    // for images and find the "undeleted" one making it come back). This is where I saw the same error
-                    // as in your question. When I tried the same code on Android R file did not come back.
                 }
                 intentSender?.let { sender ->
                     intentSenderLauncher.launch(
@@ -223,6 +215,7 @@ class MainActivity : AppCompatActivity() {
                     )
                 }
             }
+
         }
     }
 
@@ -280,51 +273,35 @@ class MainActivity : AppCompatActivity() {
         val hasReadPermission = if (Build.VERSION.SDK_INT >= 33) {
             ContextCompat.checkSelfPermission(
                 this,
-                android.Manifest.permission.READ_MEDIA_IMAGES
+                Manifest.permission.READ_MEDIA_IMAGES
             ) == PackageManager.PERMISSION_GRANTED
         } else {
             ContextCompat.checkSelfPermission(
                 this,
-                android.Manifest.permission.READ_EXTERNAL_STORAGE
+                Manifest.permission.READ_EXTERNAL_STORAGE
             ) == PackageManager.PERMISSION_GRANTED
         }
 
-//        var hasReadPermission: Boolean = false
-//        sdk29AndUp { hasReadPermission = ContextCompat.checkSelfPermission(
-//            this,
-//            android.Manifest.permission.READ_EXTERNAL_STORAGE
-//        ) == PackageManager.PERMISSION_GRANTED }
-//        sdk33AndUp { hasReadPermission = ContextCompat.checkSelfPermission(
-//            this,
-//            android.Manifest.permission.READ_MEDIA_IMAGES
-//        ) == PackageManager.PERMISSION_GRANTED }
-
         val hasWritePermission = ContextCompat.checkSelfPermission(
             this,
-            android.Manifest.permission.WRITE_EXTERNAL_STORAGE
+            Manifest.permission.WRITE_EXTERNAL_STORAGE
         ) == PackageManager.PERMISSION_GRANTED
 
         val minSdk29 = Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q
-        val minSdk33 = Build.VERSION.SDK_INT >= 33
 
         readPermissionGranted = hasReadPermission
         writePermissionGranted = hasWritePermission || minSdk29
 
         val permissionsToRequest = mutableListOf<String>()
         if(!writePermissionGranted) {
-            permissionsToRequest.add(android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
+            permissionsToRequest.add(Manifest.permission.WRITE_EXTERNAL_STORAGE)
         }
         if(!readPermissionGranted) {
-//            permissionsToRequest.add(android.Manifest.permission.READ_EXTERNAL_STORAGE)
-
             if (Build.VERSION.SDK_INT >= 33) {
-                permissionsToRequest.add(android.Manifest.permission.READ_MEDIA_IMAGES)
+                permissionsToRequest.add(Manifest.permission.READ_MEDIA_IMAGES)
             } else {
-                permissionsToRequest.add(android.Manifest.permission.READ_EXTERNAL_STORAGE)
+                permissionsToRequest.add(Manifest.permission.READ_EXTERNAL_STORAGE)
             }
-
-//            sdk29AndUp { permissionsToRequest.add(android.Manifest.permission.READ_EXTERNAL_STORAGE) }
-//            sdk33AndUp { permissionsToRequest.add(android.Manifest.permission.READ_MEDIA_IMAGES) }
         }
 
         if (permissionsToRequest.isNotEmpty()) {
