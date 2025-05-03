@@ -45,6 +45,10 @@ class MainActivity : ComponentActivity() {
                     effect = {
                         val observer = LifecycleEventObserver { _, event ->
                             if (event == Lifecycle.Event.ON_START) {
+                                // 영상에서는 ON_RESUME으로 했는데...
+                                // It's actually ON_START. onResume is triggered
+                                // when the permission dialog is closed
+                                // which is not what should happen.
                                 permissionsState.launchMultiplePermissionRequest()
                             }
                         }
@@ -66,12 +70,14 @@ class MainActivity : ComponentActivity() {
                             Manifest.permission.CAMERA -> {
                                 when {
                                     perm.status.isGranted -> {
+
                                         Text(text = "Camera permission accepted")
                                     }
                                     perm.status.shouldShowRationale -> {
                                         Text(text = "Camera permission is needed to access the camera")
                                     }
                                     perm.status.isPermanentlyDenied() -> {
+                                        // !perm.status.isGranted && !.perm.status.shouldShowRationale
                                         Text(text = "Camera permission was permanently denied.\nYou can enable it in the app.")
                                     }
                                 }
