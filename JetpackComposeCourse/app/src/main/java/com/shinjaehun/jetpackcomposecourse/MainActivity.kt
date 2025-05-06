@@ -1,6 +1,7 @@
 package com.shinjaehun.jetpackcomposecourse
 
 import android.os.Bundle
+import android.util.Log
 import android.view.MotionEvent
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -11,6 +12,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -20,9 +22,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -290,7 +294,24 @@ class MainActivity : ComponentActivity() {
 //                    Text(text = text)
 //                }
 
-//                Counter()
+// effect handler : SideEffect
+
+//            Counter()
+
+// effect handler : Recomposition 연구
+
+//            Column(
+//                modifier = Modifier.fillMaxSize(),
+//                verticalArrangement = Arrangement.Center,
+//                horizontalAlignment = Alignment.CenterHorizontally
+//            ) {
+//                var count by remember { mutableStateOf(0) }
+//                RecompositionCounter(count)
+//                Button(onClick = {count++}) {
+//                    Text(text = "Increment")
+//                }
+//            }
+
 //                MyComposable()
 //                RunTimerScreen()
 
@@ -665,6 +686,25 @@ class MainActivity : ComponentActivity() {
 //                )
 //            }
 //    )
+//}
+
+// effect handler : Recomposition 연구
+
+//@Composable
+//fun RecompositionCounter(newCount: Int) {
+//    println("newCount is $newCount")
+//    var oldCount by remember { mutableStateOf(newCount) }
+//
+//    SideEffect {
+//        oldCount = newCount
+//        Log.i(TAG, "oldCount is ${oldCount}")
+//    }
+//
+//    Column {
+//
+//        Text("NewCounter ${newCount}")
+//        println("new count has been changed from $oldCount to $newCount") // 얘가 있으면 두번 실행된다????
+//    }
 //}
 
 // effect handler : SideEffect
